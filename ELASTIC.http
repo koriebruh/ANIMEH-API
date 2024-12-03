@@ -1,0 +1,9 @@
+### GET request to example server
+DELETE http://localhost:9200/anime_info
+Accept: application/json
+Content-Type: application/json
+
+###
+GET http://localhost:9200
+Content-Type: application/json
+Accept: application/json

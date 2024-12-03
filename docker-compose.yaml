@@ -1,0 +1,17 @@
+services:
+  elasticsearch_anime:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    container_name: elasticsearch_anime
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"  # Sesuaikan memori sesuai kebutuhan
+      - "xpack.security.enabled=false"  # Menonaktifkan keamanan
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - esdata_bg:/usr/share/elasticsearch/data
+
+volumes:
+  esdata_bg:
+    driver: local

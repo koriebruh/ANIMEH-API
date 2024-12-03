@@ -1,0 +1,16 @@
+### GET request to example server
+GET http://localhost:8080/autocomplete?q=cowboy
+Accept: application/json
+Content-Type: application/json
+
+###
+### GET request to example server
+GET http://localhost:8080/autocomplete?q=hunter
+Accept: application/json
+Content-Type: application/json
+
+### GET request to example server
+GET http://localhost:8080/
+Accept: application/json
+Content-Type: application/json
+
