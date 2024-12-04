@@ -17,6 +17,15 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 )
 
+/*
+	DATA UJI KNN
+	- SCORE
+	- RANK
+	- POPULARITY
+	- MEMBER
+
+*/
+
 func InsertDataCSVToElastic() {
 	es, err := elasticsearch.NewClient(elasticsearch.Config{
 		Addresses: []string{"http://localhost:9200"},
@@ -31,6 +40,16 @@ func InsertDataCSVToElastic() {
 			ExpectContinueTimeout: 1 * time.Second,
 		},
 	})
+
+	err = AnimeIndex(es)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+
 	// Buka file CSV
 	file, err := os.Open("processed_anime_dataset.csv")
 	if err != nil {
@@ -85,6 +104,7 @@ func InsertDataCSVToElastic() {
 			"scored_by":    record[21],
 			"members":      members,
 			"image_url":    record[23],
+			"embedding":    []float64{score, rank, float64(popularity), float64(members)},
 		}
 
 		// Konversi data ke JSON

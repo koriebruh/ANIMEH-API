@@ -1,0 +1,66 @@
+#### DROP INDEX
+#DELETE http://localhost:9200/anime_info
+#Accept: application/json
+#Content-Type: application/json
+
+### CHECK FIELD
+GET http://localhost:9200/anime_info
+Content-Type: application/json
+Accept: application/json
+
+### CHECK 10 data pertamna
+GET http://localhost:9200/anime_info/_search?size=10
+Content-Type: application/json
+Accept: application/json
+
+
+###
+GET http://localhost:9200/anime_info/_search?size=2
+Content-Type: application/json
+Accept: application/json
+
+
+#### UNTUK SETUP KNN NYA, Dimensi vektor embedding (karena ada 4 nilai: score, rank, popularity, members)
+#PUT http://localhost:9200/anime_info
+#Content-Type: application/json
+#Accept: application/json
+#
+#{
+#  "mappings": {
+#    "properties": {
+#      "embedding": {
+#        "type": "dense_vector",
+#        "dims": 4
+#      }
+#    }
+#  }
+#}
+
+
+### UNTUK COBA GRET DATA RECOMEND
+GET http://localhost:9200/anime_info/_search
+Content-Type: application/json
+Accept: application/json
+
+{
+  "query": {
+    "script_score": {
+      "query": {
+        "match_all": {}
+      },
+      "script": {
+        "source": "cosineSimilarity(params.query_vector, 'embedding') + 1.0",
+        "params": {
+          "query_vector": [8.0, 400.0, 100.0, 200000.0]
+        }
+      }
+    }
+  },
+  "size": 5
+}
+
+### CEK INFO MAPING
+GET http://localhost:9200/anime_info/_mapping
+Accept: application/json
+Content-Type: application/json
+
