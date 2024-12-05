@@ -1,5 +1,5 @@
 ###  AUTO COMPLITE
-GET http://localhost:8080/autocomplete?q=One Piece
+GET http://localhost:8080/autocomplete?q=One%20Piece
 Accept: application/json
 Content-Type: application/json
 ### AUTO COMPLITE
@@ -22,17 +22,32 @@ Accept: application/json
 Content-Type: application/json
 
 ###
-GET http://localhost:8080/search/anime?min_score=6.21
+GET http://localhost:8080/search/anime?query=Naruto&page=1&limit=10
 Accept: application/json
 Content-Type: application/json
 
 ###
-GET http://localhost:8080/search/anime?genre=Action
+GET http://localhost:8080/search/anime?genre=Comedy
 Accept: application/json
 Content-Type: application/json
 
+
 ### BISA
-GET http://localhost:8080/search/anime?query=One Piece
+GET http://localhost:8080/search/anime?query=Naruto&page=1&limit=20&genre=Action&status=Finished%20Airing&min_score=8
 Accept: application/json
 Content-Type: application/json
+
+###
+
+# curl -X GET "http://localhost:8080/search/anime?query=Naruto&page=1&limit=20&genre=Action&status=Finished%20Airing&min_score=7.99" -H "Accept: application/json"
+GET http://localhost:8080/search/anime?query=Naruto&page=1&limit=20&genre=Action&status=Finished%20Airing&min_score=7.99
+Accept: application/json
+
+###
+
+# curl -X GET "http://localhost:8080/search-anime?name=One+Piece&from=0&size=20"
+GET http://localhost:8080/search/anime?name=One+Piece&from=0&size=20
+
+###
+
 

@@ -12,6 +12,7 @@ import (
 func ElasticClient() *elasticsearch.Client {
 	cfg := elasticsearch.Config{
 		Addresses: []string{"http://127.0.0.1:9200"},
+		//Addresses: []string{"http://localhost:9200"},
 		Transport: &http.Transport{
 			DialContext: (&net.Dialer{
 				Timeout:   30 * time.Second,

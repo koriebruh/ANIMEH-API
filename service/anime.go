@@ -1,14 +1,14 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/gin-gonic/gin"
-	"log"
+	"io"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -84,98 +84,104 @@ func (s AnimeServiceImpl) AutoComplete(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"suggestions": suggestions})
 }
 
-func (s AnimeServiceImpl) SearchAnime(c *gin.Context) {
-	// Ambil parameter query dan lainnya
-	query := c.DefaultQuery("query", "")
-	page := c.DefaultQuery("page", "1")
-	limit := c.DefaultQuery("limit", "20")
-	genre := c.DefaultQuery("genre", "")
-	status := c.DefaultQuery("status", "")
-	minScore := c.DefaultQuery("min_score", "")
+func (s *AnimeServiceImpl) SearchAnime(c *gin.Context) {
+	// Ambil parameter dari query
+	name := c.Query("name")
+	from := c.DefaultQuery("from", "0")
+	size := c.DefaultQuery("size", "20")
 
-	pageNum, _ := strconv.Atoi(page)
-	limitNum, _ := strconv.Atoi(limit)
-	from := (pageNum - 1) * limitNum
-
-	// Membuat query pencarian secara langsung dalam string
-	searchQuery := fmt.Sprintf(`
-		{
-			"from": %d,
-			"size": %d,
-			"query": {
-				"bool": {
-					"must": [
-						{
-							"match": {
-								"name": {
-									"query": "%s",
-									"fuzziness": "AUTO"
-								}
-							}
-						}
-					],
-					"filter": [%s]
-				}
-			}
-		}
-	`, from, limitNum, query, generateFilter(genre, status, minScore))
-
-	// Inisialisasi client ElasticSearch
-	es, err := elasticsearch.NewClient(elasticsearch.Config{
-		Addresses: []string{
-			"http://localhost:9200", // Ganti dengan alamat server Elasticsearch kamu
+	// Buat query berdasarkan spesifikasi yang diberikan
+	query := map[string]interface{}{
+		"from": from,
+		"size": size,
+		"query": map[string]interface{}{
+			"bool": map[string]interface{}{
+				"must": []interface{}{
+					map[string]interface{}{
+						"match": map[string]interface{}{
+							"name": map[string]interface{}{
+								"query":     name,
+								"fuzziness": "AUTO",
+							},
+						},
+					},
+				},
+				"should": []interface{}{
+					map[string]interface{}{
+						"term": map[string]interface{}{
+							"genres": "Comedy",
+						},
+					},
+					map[string]interface{}{
+						"bool": map[string]interface{}{
+							"must_not": map[string]interface{}{
+								"exists": map[string]interface{}{
+									"field": "genres",
+								},
+							},
+						},
+					},
+					map[string]interface{}{
+						"range": map[string]interface{}{
+							"score": map[string]interface{}{
+								"gte": 8, // Nilai score lebih besar atau sama dengan 8.0
+							},
+						},
+					},
+					map[string]interface{}{
+						"bool": map[string]interface{}{
+							"must_not": map[string]interface{}{
+								"exists": map[string]interface{}{
+									"field": "score",
+								},
+							},
+						},
+					},
+					map[string]interface{}{
+						"term": map[string]interface{}{
+							"status": "Finished Airing", // Memfilter berdasarkan status
+						},
+					},
+				},
+			},
 		},
-	})
-	if err != nil {
-		log.Printf("Error creating ElasticSearch client: %s", err)
-		c.JSON(500, gin.H{"error": "Failed to create ElasticSearch client"})
+	}
+
+	// Serialize query ke JSON
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(query); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error encoding query: %v", err)})
 		return
 	}
 
-	// Mengonversi string query menjadi io.Reader
-	res, err := es.Search(
-		es.Search.WithContext(context.Background()),
-		es.Search.WithIndex("anime_info"),                  // Nama index anime di ElasticSearch
-		es.Search.WithBody(strings.NewReader(searchQuery)), // Menggunakan strings.NewReader
-		es.Search.WithTrackTotalHits(true),
+	// Kirim permintaan ke Elasticsearch
+	res, err := s.Client.Search(
+		s.Client.Search.WithContext(context.Background()),
+		s.Client.Search.WithIndex("anime_info"),
+		s.Client.Search.WithBody(&buf),
 	)
 	if err != nil {
-		log.Printf("Error executing search: %s", err)
-		c.JSON(500, gin.H{"error": "Failed to execute search"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error performing search: %v", err)})
 		return
 	}
 	defer res.Body.Close()
 
-	// Jika berhasil, proses hasilnya dan kirimkan ke client
-	var searchResult map[string]interface{}
-	if err := json.NewDecoder(res.Body).Decode(&searchResult); err != nil {
-		log.Printf("Error decoding response: %s", err)
-		c.JSON(500, gin.H{"error": "Failed to decode search response"})
+	// Periksa status Elasticsearch response
+	if res.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(res.Body)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Elasticsearch error: %v", string(body))})
 		return
 	}
 
-	// Kirimkan hasil pencarian dalam format JSON
-	c.JSON(200, searchResult)
-}
-
-func generateFilter(genre, status, minScore string) string {
-	var filters []string
-
-	if genre != "" {
-		filters = append(filters, fmt.Sprintf(`{ "term": { "genres.keyword": "%s" } }`, genre))
-	}
-	if status != "" {
-		filters = append(filters, fmt.Sprintf(`{ "term": { "status.keyword": "%s" } }`, status))
-	}
-	if minScore != "" {
-		filters = append(filters, fmt.Sprintf(`{ "range": { "score": { "gte": %s } } }`, minScore))
+	// Decode hasil Elasticsearch
+	var result map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error decoding response: %v", err)})
+		return
 	}
 
-	// Jika tidak ada filter yang ditambahkan, kembalikan array kosong
-	if len(filters) > 0 {
-		return strings.Join(filters, ",")
-	}
-	return ""
+	// Kirim hasil ke client
+	c.JSON(http.StatusOK, result)
 }
 
 func (s AnimeServiceImpl) recommendations(c *gin.Context) {

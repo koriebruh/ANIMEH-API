@@ -11,9 +11,9 @@ import (
 // Elasticsearch client
 
 func main() {
-	es := conf.ElasticClient()
 	// Kemudian sisipkan data CSV
-	//insert.InsertDataCSVToElastic()
+	es := conf.ElasticClient()
+	//insert.InsertDataCSVToElastic(es)
 
 	animeService := service.NewAnimeService(es)
 	// Setup Gin router

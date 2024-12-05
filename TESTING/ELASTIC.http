@@ -1,7 +1,7 @@
-#### DROP INDEX
-#DELETE http://localhost:9200/anime_info
-#Accept: application/json
-#Content-Type: application/json
+### DROP INDEX
+DELETE http://localhost:9200/anime_info
+Accept: application/json
+Content-Type: application/json
 
 ### CHECK FIELD
 GET http://localhost:9200/anime_info
@@ -79,7 +79,7 @@ Accept: application/json
 Content-Type: application/json
 
 ### CEK INFO
-GET  http://localhost:9200/anime_info/_search?q=score:[7 TO *]&pretty
+GET  http://localhost:9200/anime_info/_search?q=score:[6.21 TO *]&pretty
 Accept: application/json
 Content-Type: application/json
 
@@ -91,7 +91,137 @@ Content-Type: application/json
 
 
 ### CEK INFO
-GET http://localhost:9200/anime_info/
+GET http://localhost:9200/anime_info/_search
 Accept: application/json
 Content-Type: application/json
 
+{
+  "query": {
+    "terms": {
+      "genres": ["Comedy"]
+    }
+  }
+}
+
+### CEK INFO
+GET http://localhost:9200/anime_info/_search
+Accept: application/json
+Content-Type: application/json
+
+{
+  "from": 0,
+  "size": 20,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "name": {
+              "query": "Naruto",
+              "fuzziness": "AUTO"
+            }
+          }
+        }
+      ],
+      "filter": {
+        "term": {
+          "genres": "Comedy"
+        }
+      }
+    }
+  }
+}
+### CEK INFO
+GET http://localhost:9200/anime_info/_search
+Accept: application/json
+Content-Type: application/json
+{
+  "size": 1,
+  "_source": ["genres"]
+}
+
+###
+GET http://localhost:9200/anime_info/_search
+Accept: application/json
+Content-Type: application/json
+
+{
+  "from": 0,
+  "size": 20,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "name": {
+              "query": "One Piece",
+              "fuzziness": "AUTO"
+            }
+          }
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "genres": "Comedy"
+          }
+        },
+        {
+          "bool": {
+            "must_not": {
+              "exists": {
+                "field": "genres"
+              }
+            }
+          }
+        },
+        {
+          "range": {
+            "score": {
+              "gte": 8  // Nilai score lebih besar atau sama dengan 8.0
+            }
+          }
+        },
+        {
+          "bool": {
+            "must_not": {
+              "exists": {
+                "field": "score"
+              }
+            }
+          }
+        },
+        {
+          "term": {
+            "status": "Finished Airing"  // Memfilter berdasarkan status
+          }
+        }
+      ]
+    }
+  }
+}
+
+###
+GET http://localhost:9200/anime_info/_search
+Accept: application/json
+Content-Type: application/json
+
+{
+  "from": 0,
+  "size": 20,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "name": {
+              "query": "",
+              "fuzziness": "AUTO"
+            }
+          }
+        }
+      ],
+      "filter": [{"terms":{"genres":["Comedy"]}}]
+    }
+  }
+}

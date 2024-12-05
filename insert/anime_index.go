@@ -16,7 +16,7 @@ func AnimeIndex(es *elasticsearch.Client) error {
                 "english_name": {"type": "text"},
                 "other_name": {"type": "text"},
                 "score": {"type": "float"},
-                "genres": {"type": "keyword"},
+                "genres": {"type": "text"},
                 "synopsis": {"type": "text"},
                 "type": {"type": "keyword"},
                 "episodes": {"type": "text"},

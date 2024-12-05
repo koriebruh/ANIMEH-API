@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
 	"log"
-	"net"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -26,26 +24,25 @@ import (
 
 */
 
-func InsertDataCSVToElastic() {
-	es, err := elasticsearch.NewClient(elasticsearch.Config{
-		Addresses: []string{"http://localhost:9200"},
-		Transport: &http.Transport{
-			DialContext: (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).DialContext,
-			MaxIdleConns:          100,
-			IdleConnTimeout:       90 * time.Second,
-			TLSHandshakeTimeout:   10 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
-		},
-	})
+func InsertDataCSVToElastic(es *elasticsearch.Client) {
+	//es, err := elasticsearch.NewClient(elasticsearch.Config{
+	//	Addresses: []string{"http://localhost:9200"},
+	//	Transport: &http.Transport{
+	//		DialContext: (&net.Dialer{
+	//			Timeout:   30 * time.Second,
+	//			KeepAlive: 30 * time.Second,
+	//		}).DialContext,
+	//		MaxIdleConns:          100,
+	//		IdleConnTimeout:       90 * time.Second,
+	//		TLSHandshakeTimeout:   10 * time.Second,
+	//		ExpectContinueTimeout: 1 * time.Second,
+	//	},
+	//})
 
-	err = AnimeIndex(es)
-	if err != nil {
-		log.Fatal(err)
+	err2 := AnimeIndex(es)
+	if err2 != nil {
+		log.Fatal(err2)
 	}
-
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
