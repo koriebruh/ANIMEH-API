@@ -1,16 +1,38 @@
+###  AUTO COMPLITE
+GET http://localhost:8080/autocomplete?q=One Piece
+Accept: application/json
+Content-Type: application/json
+### AUTO COMPLITE
+GET http://localhost:8080/autocomplete?q=Naruto
+Accept: application/json
+Content-Type: application/json
+
+
+
+
+
 ### GET request to example server
-GET http://localhost:8080/autocomplete?q=cowboy
+GET http://localhost:8080/
+Accept: application/json
+Content-Type: application/json
+
+### GET request to example server
+GET http://localhost:8080/search/anime?query=Naruto&page=1&limit=10&genre=Action&status=Ongoing&min_score=7
 Accept: application/json
 Content-Type: application/json
 
 ###
-### GET request to example server
-GET http://localhost:8080/autocomplete?q=hunter
+GET http://localhost:8080/search/anime?min_score=6.21
 Accept: application/json
 Content-Type: application/json
 
-### GET request to example server
-GET http://localhost:8080/
+###
+GET http://localhost:8080/search/anime?genre=Action
+Accept: application/json
+Content-Type: application/json
+
+### BISA
+GET http://localhost:8080/search/anime?query=One Piece
 Accept: application/json
 Content-Type: application/json
 

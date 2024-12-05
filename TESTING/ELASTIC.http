@@ -8,6 +8,20 @@ GET http://localhost:9200/anime_info
 Content-Type: application/json
 Accept: application/json
 
+### dengan name
+POST http://localhost:9200/anime_info/_search
+Content-Type: application/json
+Accept: application/json
+
+{
+  "query": {
+    "match": {
+      "name": "Hunter x Hunter Pilot"
+    }
+  }
+}
+
+
 ### CHECK 10 data pertamna
 GET http://localhost:9200/anime_info/_search?size=10
 Content-Type: application/json
@@ -15,7 +29,7 @@ Accept: application/json
 
 
 ###
-GET http://localhost:9200/anime_info/_search?size=2
+GET http://localhost:9200/anime_info/_search?size=1
 Content-Type: application/json
 Accept: application/json
 
@@ -61,6 +75,23 @@ Accept: application/json
 
 ### CEK INFO MAPING
 GET http://localhost:9200/anime_info/_mapping
+Accept: application/json
+Content-Type: application/json
+
+### CEK INFO
+GET  http://localhost:9200/anime_info/_search?q=score:[7 TO *]&pretty
+Accept: application/json
+Content-Type: application/json
+
+
+### CEK INFO
+GET http://localhost:9200/anime_info/
+Accept: application/json
+Content-Type: application/json
+
+
+### CEK INFO
+GET http://localhost:9200/anime_info/
 Accept: application/json
 Content-Type: application/json
 
