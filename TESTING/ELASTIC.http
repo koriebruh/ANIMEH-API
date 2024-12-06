@@ -218,3 +218,16 @@ Content-Type: application/json
     }
   }
 }
+###
+GET http://localhost:9200/anime_info/_search
+Accept: application/json
+Content-Type: application/json
+
+{
+  "_source": ["embedding"],  // Meminta hanya field 'embedding'
+  "query": {
+    "term": {
+      "_id": "100"  // Ganti dengan ID yang sesuai
+    }
+  }
+}

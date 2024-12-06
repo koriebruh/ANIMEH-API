@@ -33,11 +33,16 @@ Content-Type: application/json
 
 
 ### TOP ANIME
-GET http://localhost:8080//anime/top?top_year=2022
+GET http://localhost:8080/anime/top?top_year=2022
 Accept: application/json
 Content-Type: application/json
 
 ### find by id
-GET http://localhost:8080//anime/100
+GET http://localhost:8080/anime/100
+Accept: application/json
+Content-Type: application/json
+
+### find recomend by id, 1page 10 data bg
+GET http://localhost:8080/anime/100/recommend?page=1
 Accept: application/json
 Content-Type: application/json

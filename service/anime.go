@@ -8,13 +8,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
 type AnimeService interface {
 	AutoComplete(c *gin.Context)
 	SearchAnime(c *gin.Context)
-	recommendations(c *gin.Context)
+	RecommendById(c *gin.Context)
 	FindById(c *gin.Context)
 	TopAnime(c *gin.Context)
 }
@@ -174,9 +175,153 @@ func (s *AnimeServiceImpl) SearchAnime(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-func (s AnimeServiceImpl) recommendations(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+func (s AnimeServiceImpl) RecommendById(c *gin.Context) {
+	// Ambil parameter ID dari URL
+	param := c.Param("id")
+	query := c.DefaultQuery("page", strconv.Itoa(1))
+	page, _ := strconv.Atoi(query)
+
+	if param == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Query parameter 'id' is required"})
+		return
+	}
+
+	// Step 1: Query pertama untuk mengambil embedding berdasarkan ID
+	esQuery := fmt.Sprintf(`{
+		"_source": ["embedding"],  
+		"query": {
+			"term": {
+				"_id": "%v"  
+			}
+		}
+	}`, param)
+
+	log.Print(esQuery)
+
+	// Melakukan pencarian ke Elasticsearch untuk mendapatkan embedding
+	res, err := s.Client.Search(
+		s.Client.Search.WithContext(context.Background()),
+		s.Client.Search.WithIndex("anime_info"),
+		s.Client.Search.WithBody(strings.NewReader(esQuery)),
+		s.Client.Search.WithTrackTotalHits(true),
+	)
+
+	if err != nil {
+		log.Printf("Error searching Elasticsearch for embedding: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to execute search query for embedding",
+		})
+		return
+	}
+	defer res.Body.Close()
+
+	// Periksa apakah ada error dalam response
+	if res.IsError() {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Elasticsearch query error for embedding: %s", res.String()),
+		})
+		return
+	}
+
+	// Parsing response body untuk mendapatkan embedding
+	var result map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Failed to parse response: %v", err),
+		})
+		return
+	}
+
+	// Mengecek apakah ada hits (hasil pencarian)
+	hits, ok := result["hits"].(map[string]interface{})["hits"].([]interface{})
+	if !ok || len(hits) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Document not found"})
+		return
+	}
+
+	// Mengambil embedding dari hasil pencarian
+	document := hits[0].(map[string]interface{})
+	embedding, exists := document["_source"].(map[string]interface{})["embedding"].([]interface{})
+	if !exists {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Embedding field not found",
+		})
+		return
+	}
+
+	// Konversi embedding menjadi array float64
+	var queryVector []float64
+	for _, v := range embedding {
+		if num, ok := v.(float64); ok {
+			queryVector = append(queryVector, num)
+		}
+	}
+
+	// Jika embedding tidak ditemukan atau kosong
+	if len(queryVector) == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to extract embedding data",
+		})
+		return
+	}
+
+	// Step 2: Query kedua untuk mendapatkan rekomendasi berdasarkan cosine similarity
+	recommendationQuery := fmt.Sprintf(`{
+		"query": {
+			"script_score": {
+				"query": {
+					"match_all": {}
+				},
+				"script": {
+					"source": "cosineSimilarity(params.query_vector, 'embedding') + 1.0",
+					"params": {
+						"query_vector": [%v,%v,%v,%v]
+					}
+				}
+			}
+		},
+		"size": %v
+	}`, queryVector[0], queryVector[1], queryVector[2], queryVector[3], page*10)
+
+	log.Print(queryVector)
+	log.Print(recommendationQuery)
+
+	// Melakukan pencarian rekomendasi menggunakan query kedua
+	res, err = s.Client.Search(
+		s.Client.Search.WithContext(context.Background()),
+		s.Client.Search.WithIndex("anime_info"),
+		s.Client.Search.WithBody(strings.NewReader(recommendationQuery)),
+		s.Client.Search.WithTrackTotalHits(true),
+	)
+
+	if err != nil {
+		log.Printf("Error searching recommendations: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to execute recommendation query",
+		})
+		return
+	}
+	defer res.Body.Close()
+
+	// Periksa apakah ada error dalam response
+	if res.IsError() {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Elasticsearch query error for recommendations: %s", res.String()),
+		})
+		return
+	}
+
+	// Parsing response body untuk rekomendasi
+	var recommendationResult map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&recommendationResult); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Failed to parse recommendation response: %v", err),
+		})
+		return
+	}
+
+	// Mengirimkan hasil rekomendasi
+	c.JSON(http.StatusOK, recommendationResult)
 }
 
 func (s AnimeServiceImpl) FindById(c *gin.Context) {

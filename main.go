@@ -24,6 +24,7 @@ func main() {
 	r.GET("/search/anime", animeService.SearchAnime)
 	r.GET("/anime/top", animeService.TopAnime)
 	r.GET("/anime/:id", animeService.FindById)
+	r.GET("/anime/:id/recommend", animeService.RecommendById)
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "application/json", "WOI")
