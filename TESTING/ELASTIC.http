@@ -16,7 +16,7 @@ Accept: application/json
 {
   "query": {
     "match": {
-      "name": "Hunter x Hunter Pilot"
+      "name": "Sousou no Frieren"
     }
   }
 }
@@ -201,44 +201,4 @@ Content-Type: application/json
   }
 }
 
-###
-GET http://localhost:9200/anime_info/_search
-Accept: application/json
-Content-Type: application/json
 
-{
-  "from": 0,
-  "size": 20,
-  "query": {
-    "bool": {
-      "should": [
-        {
-          "match": {
-            "name": {
-              "query": "",
-              "fuzziness": "AUTO"
-            }
-          }
-        },
-        {
-          "term": {
-            "genres": "Comedy"  // Kondisi untuk mencari berdasarkan genre saja
-          }
-        },
-        {
-          "range": {
-            "score": {
-              "gte": 8  // Nilai score lebih besar atau sama dengan 8.0
-            }
-          }
-        },
-        {
-          "term": {
-            "status": "Finished Airing"  // Kondisi pencarian berdasarkan status
-          }
-        }
-      ],
-      "minimum_should_match": 1  // Pastikan salah satu kondisi harus ada
-    }
-  }
-}

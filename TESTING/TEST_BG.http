@@ -3,13 +3,32 @@ GET http://localhost:8080/autocomplete?q=One%20Piece
 Accept: application/json
 Content-Type: application/json
 ### AUTO COMPLITE
-GET http://localhost:8080/autocomplete?q=Naruto
+GET http://localhost:8080/autocomplete?q=sousou
 Accept: application/json
 Content-Type: application/json
 
 
 
+
 ### SEACRCH
 GET http://localhost:8080/search/anime?name=One+Piece&from=0&size=20&genre=Comedy
+Accept: application/json
+Content-Type: application/json
+### SEARCH ONLY GENRE
+GET http://localhost:8080/search/anime?genre=Comedy
+Accept: application/json
+Content-Type: application/json
+### SEARCH ONLY NAME
+GET http://localhost:8080/search/anime?name=Sousou no Frieren
+Accept: application/json
+Content-Type: application/json
+### SEARCH WITH MIN RATING
+GET http://localhost:8080/search/anime?min_score=8
+Accept: application/json
+Content-Type: application/json
+
+
+### TOP ANIME
+GET http://localhost:8080//anime/top?top_year=2022
 Accept: application/json
 Content-Type: application/json

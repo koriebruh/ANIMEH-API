@@ -1,0 +1,95 @@
+### UNTUK COBA GRET DATA RECOMEND,[SCORE, RANK , POPULARITY , MEMBER]
+GET http://localhost:9200/anime_info/_search
+Content-Type: application/json
+Accept: application/json
+
+{
+  "query": {
+    "script_score": {
+      "query": {
+        "match_all": {}
+      },
+      "script": {
+        "source": "cosineSimilarity(params.query_vector, 'embedding') + 1.0",
+        "params": {
+          "query_vector": [8.0, 400.0, 3299.0, 40042.0]
+        }
+      }
+    }
+  },
+  "size": 5
+}
+
+
+### SUKSES FIND
+GET http://localhost:9200/anime_info/_search
+Accept: application/json
+Content-Type: application/json
+
+{
+  "from": 0,
+  "size": 20,
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "name": {
+              "query": "",
+              "fuzziness": "AUTO"
+            }
+          }
+        },
+        {
+          "term": {
+            "genres": "Comedy"  // Kondisi untuk mencari berdasarkan genre saja
+          }
+        },
+        {
+          "range": {
+            "score": {
+              "gte": 8  // Nilai score lebih besar atau sama dengan 8.0
+            }
+          }
+        },
+        {
+          "term": {
+            "status": "Finished Airing"  // Kondisi pencarian berdasarkan status
+          }
+        }
+      ],
+      "minimum_should_match": 1  // Pastikan salah satu kondisi harus ada
+    }
+  }
+}
+
+
+###
+GET http://localhost:9200/anime_info/_search
+Accept: application/json
+Content-Type: application/json
+
+{
+  "from": 0,
+  "size": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "wildcard": {
+            "aired": {
+              "value": "*2023*"  // Menemukan semua anime yang mencakup tahun 2023 dalam field 'aired'
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "score": {
+        "order": "desc"  // Urutkan berdasarkan score secara menurun
+      }
+    }
+  ]
+}

@@ -191,6 +191,77 @@ func (s AnimeServiceImpl) AnimeFilter(c *gin.Context) {
 }
 
 func (s AnimeServiceImpl) TopAnime(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	topYear := c.DefaultQuery("top_year", "2023") // Default tahun 2023 jika parameter tidak ada
+
+	// Buat query JSON dinamis berdasarkan tahun yang diterima
+	query := map[string]interface{}{
+		"from": 0,
+		"size": 10, // Ambil 10 anime teratas
+		"query": map[string]interface{}{
+			"bool": map[string]interface{}{
+				"filter": []interface{}{
+					map[string]interface{}{
+						"wildcard": map[string]interface{}{
+							"aired": map[string]interface{}{
+								"value": fmt.Sprintf("*%s*", topYear), // Mencari tahun yang diberikan dalam 'aired'
+							},
+						},
+					},
+				},
+			},
+		},
+		"sort": []interface{}{
+			map[string]interface{}{
+				"score": map[string]interface{}{
+					"order": "desc", // Urutkan berdasarkan score secara menurun
+				},
+			},
+		},
+	}
+
+	// Ubah query menjadi JSON
+	queryBody, err := json.Marshal(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Failed to build query: %v", err),
+		})
+		return
+	}
+
+	// Menggunakan strings.NewReader untuk mengubah query menjadi io.Reader
+	res, err := s.Client.Search(
+		s.Client.Search.WithContext(context.Background()),
+		s.Client.Search.WithIndex("anime_info"),
+		s.Client.Search.WithBody(strings.NewReader(string(queryBody))), // Menggunakan strings.NewReader
+		s.Client.Search.WithTrackTotalHits(true),
+	)
+
+	if err != nil {
+		log.Printf("Error searching Elasticsearch: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to execute search query",
+		})
+		return
+	}
+	defer res.Body.Close()
+
+	// Periksa apakah ada error dalam response
+	if res.IsError() {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Elasticsearch query error: %s", res.String()),
+		})
+		return
+	}
+
+	// Parsing response body
+	var result map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Failed to parse response: %v", err),
+		})
+		return
+	}
+
+	// Mengirimkan hasil pencarian
+	c.JSON(http.StatusOK, result)
 }
