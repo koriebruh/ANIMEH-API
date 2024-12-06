@@ -1,0 +1,15 @@
+###  AUTO COMPLITE
+GET http://localhost:8080/autocomplete?q=One%20Piece
+Accept: application/json
+Content-Type: application/json
+### AUTO COMPLITE
+GET http://localhost:8080/autocomplete?q=Naruto
+Accept: application/json
+Content-Type: application/json
+
+
+
+### SEACRCH
+GET http://localhost:8080/search/anime?name=One+Piece&from=0&size=20&genre=Comedy
+Accept: application/json
+Content-Type: application/json

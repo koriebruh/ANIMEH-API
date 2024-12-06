@@ -154,7 +154,7 @@ Content-Type: application/json
         {
           "match": {
             "name": {
-              "query": "One Piece",
+              "query": "",
               "fuzziness": "AUTO"
             }
           }
@@ -211,7 +211,7 @@ Content-Type: application/json
   "size": 20,
   "query": {
     "bool": {
-      "must": [
+      "should": [
         {
           "match": {
             "name": {
@@ -219,9 +219,26 @@ Content-Type: application/json
               "fuzziness": "AUTO"
             }
           }
+        },
+        {
+          "term": {
+            "genres": "Comedy"  // Kondisi untuk mencari berdasarkan genre saja
+          }
+        },
+        {
+          "range": {
+            "score": {
+              "gte": 8  // Nilai score lebih besar atau sama dengan 8.0
+            }
+          }
+        },
+        {
+          "term": {
+            "status": "Finished Airing"  // Kondisi pencarian berdasarkan status
+          }
         }
       ],
-      "filter": [{"terms":{"genres":["Comedy"]}}]
+      "minimum_should_match": 1  // Pastikan salah satu kondisi harus ada
     }
   }
 }

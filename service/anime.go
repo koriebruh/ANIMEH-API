@@ -1,13 +1,12 @@
 package service
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/gin-gonic/gin"
-	"io"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -85,18 +84,19 @@ func (s AnimeServiceImpl) AutoComplete(c *gin.Context) {
 }
 
 func (s *AnimeServiceImpl) SearchAnime(c *gin.Context) {
-	// Ambil parameter dari query
-	name := c.Query("name")
-	from := c.DefaultQuery("from", "0")
-	size := c.DefaultQuery("size", "20")
+	// Ambil query string yang mungkin dikirim oleh client
+	name := c.DefaultQuery("name", "")
+	genres := c.DefaultQuery("genres", "")
+	status := c.DefaultQuery("status", "")
+	minScore := c.DefaultQuery("min_score", "8")
 
-	// Buat query berdasarkan spesifikasi yang diberikan
+	// Build query JSON
 	query := map[string]interface{}{
-		"from": from,
-		"size": size,
+		"from": 0,
+		"size": 20,
 		"query": map[string]interface{}{
 			"bool": map[string]interface{}{
-				"must": []interface{}{
+				"should": []interface{}{
 					map[string]interface{}{
 						"match": map[string]interface{}{
 							"name": map[string]interface{}{
@@ -105,82 +105,73 @@ func (s *AnimeServiceImpl) SearchAnime(c *gin.Context) {
 							},
 						},
 					},
-				},
-				"should": []interface{}{
 					map[string]interface{}{
 						"term": map[string]interface{}{
-							"genres": "Comedy",
-						},
-					},
-					map[string]interface{}{
-						"bool": map[string]interface{}{
-							"must_not": map[string]interface{}{
-								"exists": map[string]interface{}{
-									"field": "genres",
-								},
-							},
+							"genres": genres, // Filter berdasarkan genres
 						},
 					},
 					map[string]interface{}{
 						"range": map[string]interface{}{
 							"score": map[string]interface{}{
-								"gte": 8, // Nilai score lebih besar atau sama dengan 8.0
-							},
-						},
-					},
-					map[string]interface{}{
-						"bool": map[string]interface{}{
-							"must_not": map[string]interface{}{
-								"exists": map[string]interface{}{
-									"field": "score",
-								},
+								"gte": minScore, // Filter berdasarkan score minimal
 							},
 						},
 					},
 					map[string]interface{}{
 						"term": map[string]interface{}{
-							"status": "Finished Airing", // Memfilter berdasarkan status
+							"status": status, // Filter berdasarkan status
 						},
 					},
 				},
+				"minimum_should_match": 1, // Setidaknya satu kondisi harus terpenuhi
 			},
 		},
 	}
 
-	// Serialize query ke JSON
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(query); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error encoding query: %v", err)})
+	// Ubah query menjadi JSON
+	queryBody, err := json.Marshal(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Failed to build query: %v", err),
+		})
 		return
 	}
 
-	// Kirim permintaan ke Elasticsearch
+	// Melakukan pencarian ke Elasticsearch
 	res, err := s.Client.Search(
 		s.Client.Search.WithContext(context.Background()),
 		s.Client.Search.WithIndex("anime_info"),
-		s.Client.Search.WithBody(&buf),
+		s.Client.Search.WithBody(strings.NewReader(string(queryBody))), // Menggunakan strings.NewReader
+		s.Client.Search.WithTrackTotalHits(true),
 	)
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error performing search: %v", err)})
+		log.Printf("Error searching Elasticsearch: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to execute search query",
+		})
 		return
 	}
 	defer res.Body.Close()
 
-	// Periksa status Elasticsearch response
-	if res.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(res.Body)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Elasticsearch error: %v", string(body))})
+	// Periksa apakah ada error dalam response
+	if res.IsError() {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Elasticsearch query error: %s", res.String()),
+		})
 		return
 	}
 
-	// Decode hasil Elasticsearch
+	// Parsing response body
 	var result map[string]interface{}
 	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Error decoding response: %v", err)})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Failed to parse response: %v", err),
+		})
 		return
 	}
 
-	// Kirim hasil ke client
+	// Mengirimkan hasil pencarian
 	c.JSON(http.StatusOK, result)
 }
 

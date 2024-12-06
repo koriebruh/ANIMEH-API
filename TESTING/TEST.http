@@ -45,8 +45,11 @@ Accept: application/json
 
 ###
 
-# curl -X GET "http://localhost:8080/search-anime?name=One+Piece&from=0&size=20"
-GET http://localhost:8080/search/anime?name=One+Piece&from=0&size=20
+###
+GET http://localhost:8080/search/anime?name=One+Piece&from=0&size=20&genre=Comedy
+
+###
+GET http://localhost:8080/search/anime?min_score=7
 
 ###
 
