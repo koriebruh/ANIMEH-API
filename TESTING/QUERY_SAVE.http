@@ -35,7 +35,7 @@ Content-Type: application/json
         {
           "match": {
             "name": {
-              "query": "",
+              "query": "One Piece",
               "fuzziness": "AUTO"
             }
           }

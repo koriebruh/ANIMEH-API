@@ -20,10 +20,10 @@ func main() {
 	r := gin.Default()
 
 	// Define route for auto-complete
-	//r.GET("/autocomplete", handler.AutoCompleteHandler)
 	r.GET("/autocomplete", animeService.AutoComplete)
 	r.GET("/search/anime", animeService.SearchAnime)
 	r.GET("/anime/top", animeService.TopAnime)
+	r.GET("/anime/:id", animeService.FindById)
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "application/json", "WOI")

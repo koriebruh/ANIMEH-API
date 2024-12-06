@@ -16,7 +16,6 @@ type AnimeService interface {
 	SearchAnime(c *gin.Context)
 	recommendations(c *gin.Context)
 	FindById(c *gin.Context)
-	AnimeFilter(c *gin.Context)
 	TopAnime(c *gin.Context)
 }
 
@@ -181,13 +180,68 @@ func (s AnimeServiceImpl) recommendations(c *gin.Context) {
 }
 
 func (s AnimeServiceImpl) FindById(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
+	param := c.Param("id")
+	if param == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Query parameter 'id' is required"})
+		return
+	}
 
-func (s AnimeServiceImpl) AnimeFilter(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	// Membuat query untuk mencari berdasarkan ID
+	esQuery := fmt.Sprintf(`{
+		"query": {
+			"term": {
+				"_id": "%v"
+			}
+		}
+	}`, param)
+
+	// Melakukan pencarian ke Elasticsearch
+	res, err := s.Client.Search(
+		s.Client.Search.WithContext(context.Background()),
+		s.Client.Search.WithIndex("anime_info"),
+		s.Client.Search.WithBody(strings.NewReader(esQuery)),
+		s.Client.Search.WithTrackTotalHits(true),
+	)
+
+	if err != nil {
+		log.Printf("Error searching Elasticsearch: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to execute search query",
+		})
+		return
+	}
+	defer res.Body.Close()
+
+	// Periksa apakah ada error dalam response
+	if res.IsError() {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Elasticsearch query error: %s", res.String()),
+		})
+		return
+	}
+
+	// Parsing response body dari Elasticsearch
+	var result map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Failed to parse response: %v", err),
+		})
+		return
+	}
+
+	// Mengecek apakah ada hits (hasil pencarian)
+	hits, ok := result["hits"].(map[string]interface{})["hits"].([]interface{})
+	if !ok || len(hits) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Document not found"})
+		return
+	}
+
+	// Mengambil dokumen pertama dari hasil hits
+	document := hits[0].(map[string]interface{})
+
+	// Mengirimkan hasil pencarian
+	c.JSON(http.StatusOK, document)
+
 }
 
 func (s AnimeServiceImpl) TopAnime(c *gin.Context) {

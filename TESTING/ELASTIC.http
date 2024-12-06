@@ -201,4 +201,20 @@ Content-Type: application/json
   }
 }
 
+###
+GET http://localhost:9200/anime_info/_doc/21
+Accept: application/json
+Content-Type: application/json
 
+###
+GET http://localhost:9200/anime_info/_search
+Accept: application/json
+Content-Type: application/json
+
+{
+  "query": {
+    "term": {
+      "_id": "100"
+    }
+  }
+}
