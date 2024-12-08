@@ -93,3 +93,9 @@ Content-Type: application/json
     }
   ]
 }
+
+###
+HEAD http://localhost:9200/anime_info/_doc/100
+
+###
+GET http://localhost:9200/anime_info/_doc/2

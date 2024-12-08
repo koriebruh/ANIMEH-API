@@ -81,3 +81,10 @@ Content-Type: application/json
   "email": "himmel@gmail",
   "password": "himmel"
 }
+
+
+### ADD FAV
+POST http://localhost:8080/users/fav/100
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM2Njc5MzZ9.490qD8GsljtluYJ64Zf4EmZB10yBPZF-2ASjEr271yk

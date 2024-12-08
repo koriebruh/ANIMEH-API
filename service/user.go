@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -12,6 +13,7 @@ import (
 	"koriebruh/find/dto"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -121,7 +123,7 @@ func (s UserServiceImpl) Login(c *gin.Context) {
 	//SAVE EMAIL DI JWT
 	expTime := time.Now().Add(time.Minute * 5) // << KADALUARSA DALAM 5 minute
 	claims := conf.JWTClaim{
-		Email: user.Email,
+		UserId: int(user.ID),
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "koriebruh",
 			ExpiresAt: jwt.NewNumericDate(expTime),
@@ -154,8 +156,70 @@ func (s UserServiceImpl) ConfirmChangePass(c *gin.Context) {
 }
 
 func (s UserServiceImpl) AddFavAnime(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	// EKSTAK ID ANIME YG DI TAMBAHKAN
+	param := c.Param("id")
+	animeId, err := strconv.Atoi(param)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error Request in id param"})
+		return
+	}
+
+	// EKSTAK JWT
+	userIdJWT, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "User ID not found in context",
+		})
+		return
+	}
+	log.Println("HASIL EKSTAK JWT INI ID ", userIdJWT)
+
+	var userId uint
+	switch v := userIdJWT.(type) {
+	case int:
+		userId = uint(v)
+	case string:
+		atoi, _ := strconv.Atoi(v)
+		userId = uint(atoi)
+	}
+
+	// CHECK APAKAH ANIME DENGAN ID TESEBUT ADA DI DB ELASTIC ?
+	EsRequest := fmt.Sprintf("http://localhost:9200/anime_info/_doc/%v", animeId)
+	resp, err := http.Get(EsRequest)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error Request in ES"})
+		return
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		c.JSON(http.StatusConflict, gin.H{"error": "Anime id not found"})
+		return
+	}
+
+	// CHECK ALREADY EXIST ?
+	var existingFavorite domain.Favorite
+	if err := s.DB.WithContext(c).Where("user_id = ? AND anime_id = ?", userId, animeId).First(&existingFavorite).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Anime already in favorites"})
+		return
+	} else if err != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking favorite anime"})
+		return
+	}
+
+	//ADD TO FAV
+	newFav := domain.Favorite{
+		UserID:  uint(userId),
+		AnimeID: uint(animeId),
+	}
+
+	if err := s.DB.WithContext(c).Create(&newFav).Error; err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Failed to add fav"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": "Accepted new fav"})
+	return
+
 }
 
 func (s UserServiceImpl) RemoveFavAnime(c *gin.Context) {

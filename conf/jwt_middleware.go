@@ -10,7 +10,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// JWTAuthMiddleware adalah middleware untuk memvalidasi JWT
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Ekstrak token dari header
@@ -34,7 +33,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Set klaim di context untuk digunakan di handler selanjutnya
-		c.Set("email", claims.Email)
+		c.Set("user_id", claims.UserId)
 		c.Set("claims", claims)
 
 		// Lanjutkan ke handler berikutnya

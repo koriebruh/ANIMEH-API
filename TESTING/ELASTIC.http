@@ -231,3 +231,18 @@ Content-Type: application/json
     }
   }
 }
+
+###
+HEAD http://localhost:9200/anime_info/_search
+Accept: application/json
+Content-Type: application/json
+
+{
+  "query": {
+    "term": {
+      "anime_id": "100"  // Ganti dengan ID yang sesuai
+    }
+  }
+}
+###
+HEAD http://localhost:9200/anime_info/_doc/100
