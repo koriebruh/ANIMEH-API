@@ -13,9 +13,11 @@ import (
 func main() {
 	// Kemudian sisipkan data CSV
 	es := conf.ElasticClient()
+	db := conf.InitDB()
 	//insert.InsertDataCSVToElastic(es)
 
 	animeService := service.NewAnimeService(es)
+	userService := service.NewUserService(es, db)
 	// Setup Gin router
 	r := gin.Default()
 
@@ -25,6 +27,8 @@ func main() {
 	r.GET("/anime/top", animeService.TopAnime)
 	r.GET("/anime/:id", animeService.FindById)
 	r.GET("/anime/:id/recommend", animeService.RecommendById)
+
+	r.POST("/users", userService.Register)
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "application/json", "WOI")

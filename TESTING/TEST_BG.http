@@ -46,3 +46,17 @@ Content-Type: application/json
 GET http://localhost:8080/anime/100/recommend?page=1
 Accept: application/json
 Content-Type: application/json
+
+
+
+
+### CREATE NEW USER
+POST http://localhost:8080/users
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "koriebruh",
+  "email": "koriebruh@gmail",
+  "password": "korie123"
+}
