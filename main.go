@@ -31,6 +31,7 @@ func main() {
 	r.POST("/users", userService.Register)
 	r.POST("/users/login", userService.Login)
 	r.POST("/users/fav/:id", conf.JWTAuthMiddleware(), userService.AddFavAnime)
+	r.DELETE("/users/fav/:id", conf.JWTAuthMiddleware(), userService.RemoveFavAnime)
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "application/json", "WOI")

@@ -217,14 +217,57 @@ func (s UserServiceImpl) AddFavAnime(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": "Accepted new fav"})
+	c.JSON(http.StatusOK, gin.H{"message": "Accepted new fav"})
 	return
 
 }
 
 func (s UserServiceImpl) RemoveFavAnime(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	// EKSTAK ID ANIME YG AKAN DI HAPUS
+	param := c.Param("id")
+	animeId, err := strconv.Atoi(param)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error Request in id param"})
+		return
+	}
+
+	// EKSTAK JWT
+	userIdJWT, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "User ID not found in context",
+		})
+		return
+	}
+	log.Println("HASIL EKSTAK JWT INI ID ", userIdJWT)
+
+	var userId uint
+	switch v := userIdJWT.(type) {
+	case int:
+		userId = uint(v)
+	case string:
+		atoi, _ := strconv.Atoi(v)
+		userId = uint(atoi)
+	}
+
+	//FIND EXITS OR NO?
+	var existingFavorite domain.Favorite
+	if err := s.DB.WithContext(c).Where("user_id = ? AND anime_id = ?", userId, animeId).First(&existingFavorite).Error; err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Anime not found in your favorites"})
+		return
+	}
+
+	// DO DELETE
+	if err = s.DB.WithContext(c).Where("user_id = ? AND anime_id = ?", userId, animeId).
+		First(&existingFavorite).Delete(&domain.Favorite{}).Error; err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error failed to delete fav"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully remove from favorite"})
+	return
+
 }
 
 func (s UserServiceImpl) FindAllFavAnime(c *gin.Context) {
