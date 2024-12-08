@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
@@ -14,6 +15,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -271,6 +273,69 @@ func (s UserServiceImpl) RemoveFavAnime(c *gin.Context) {
 }
 
 func (s UserServiceImpl) FindAllFavAnime(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	// EKSTAK JWT
+	userIdJWT, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "User ID not found in context",
+		})
+		return
+	}
+
+	// AMBIL Kolom anime_id only
+	var listFav []string
+	if err := s.DB.WithContext(c).Model(&domain.Favorite{}).Where("user_id = ?", userIdJWT).
+		Pluck("anime_id", &listFav).Error; err != nil {
+
+		c.JSON(http.StatusConflict, gin.H{"error": "List Favorite anime not found"})
+		return
+	}
+
+	// MEMISHKAN JADI TANDA KOMA
+	animeIds := strings.Join(listFav, ",")
+	esQuery := fmt.Sprintf(`{
+		"query": {
+			"terms": {
+			  "anime_id": [%s]
+			}
+		}
+	}`, animeIds)
+
+	log.Println(esQuery)
+
+	res, err := s.EsClient.Search(
+		s.EsClient.Search.WithContext(c),
+		s.EsClient.Search.WithIndex("anime_info"),
+		s.EsClient.Search.WithBody(strings.NewReader(esQuery)),
+		s.EsClient.Search.WithTrackTotalHits(true),
+	)
+
+	if err != nil {
+		log.Printf("Error find favorite anime: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to execute favorite query",
+		})
+		return
+	}
+	defer res.Body.Close()
+
+	// Periksa apakah ada error dalam response
+	if res.IsError() {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Elasticsearch query error for list favortie: %s", res.String()),
+		})
+		return
+	}
+
+	// Parsing response body untuk rekomendasi
+	var recommendationResult map[string]interface{}
+	if err := json.NewDecoder(res.Body).Decode(&recommendationResult); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": fmt.Sprintf("Failed to parse list favortie: %v", err),
+		})
+		return
+	}
+
+	// Mengirimkan hasil rekomendasi
+	c.JSON(http.StatusOK, recommendationResult)
 }

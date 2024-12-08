@@ -56,20 +56,19 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "username": "koriebruh",
-  "email": "koriebruh@gmail",
-  "password": "korie123"
+  "username": "hanni",
+  "email": "hannih@gmail",
+  "password": "hanni72"
 }
 
-### CREATE NEW USER
-POST http://localhost:8080/users
+### LOGIN TEST
+POST http://localhost:8080/users/login
 Accept: application/json
 Content-Type: application/json
 
 {
-  "username": "himmell",
-  "email": "himmel@gmail",
-  "password": "himmel"
+  "email": "hannih@gmail",
+  "password": "hanni72"
 }
 
 ### LOGIN TEST
@@ -84,14 +83,21 @@ Content-Type: application/json
 
 
 ### ADD FAV
-POST http://localhost:8080/users/fav/123
+POST http://localhost:8080/users/fav/72
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM2NzcyMTJ9.79CtQZaxm_8Mf0dvKQZeQWoemhDnuDZyEvvh6Q-bfl0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM2NzgxMzd9.kY8wzBOR3AnVo7WyBbQ4xIeXdU3WZ-tYZqx7ZRv4_vM
 
 ### ADD FAV
-DELETE http://localhost:8080/users/fav/123
+DELETE http://localhost:8080/users/fav/1000
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM2NzczODZ9.3WupZCRlcIIUKKlhwY7ARNnq24im40sNpjqc76t5Zao
+
+
+### LIST FAV
+GET http://localhost:8080/users/fav
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM2ODA1ODl9.AaptFTpONKnbBNOGuB7ilI0XWty7pQNy-UUoEFE1fc4
 

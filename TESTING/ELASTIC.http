@@ -245,4 +245,14 @@ Content-Type: application/json
   }
 }
 ###
-HEAD http://localhost:9200/anime_info/_doc/100
+POST http://localhost:9200/anime_info/_search
+Content-Type: application/json
+Accept: application/json
+
+{
+  "query": {
+    "terms": {
+      "anime_id": ["123","123","16","19","112"]
+    }
+  }
+}
