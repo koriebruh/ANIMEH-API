@@ -29,6 +29,7 @@ func main() {
 	r.GET("/anime/:id/recommend", animeService.RecommendById)
 
 	r.POST("/users", userService.Register)
+	r.POST("/users/login", userService.Login)
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "application/json", "WOI")

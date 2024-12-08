@@ -60,3 +60,24 @@ Content-Type: application/json
   "email": "koriebruh@gmail",
   "password": "korie123"
 }
+
+### CREATE NEW USER
+POST http://localhost:8080/users
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "himmell",
+  "email": "himmel@gmail",
+  "password": "himmel"
+}
+
+### LOGIN TEST
+POST http://localhost:8080/users/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "himmel@gmail",
+  "password": "himmel"
+}
