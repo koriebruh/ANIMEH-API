@@ -30,6 +30,9 @@ func main() {
 
 	r.POST("/users", userService.Register)
 	r.POST("/users/login", userService.Login)
+	r.POST("/users/change", conf.JWTAuthMiddleware(), userService.ChangePass)
+	r.POST("/users/change-confirm", conf.JWTAuthMiddleware(), userService.ConfirmChangePass)
+
 	r.POST("/users/fav/:id", conf.JWTAuthMiddleware(), userService.AddFavAnime)
 	r.DELETE("/users/fav/:id", conf.JWTAuthMiddleware(), userService.RemoveFavAnime)
 	r.GET("/users/fav", conf.JWTAuthMiddleware(), userService.FindAllFavAnime)

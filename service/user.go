@@ -1,6 +1,7 @@
 package service
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -148,13 +149,85 @@ func (s UserServiceImpl) Login(c *gin.Context) {
 }
 
 func (s UserServiceImpl) ChangePass(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	var body dto.ChangePass
+	log.Print(body)
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	// EKSTAK JWT AMBIL UNTUK VALIDATION DENGAN REQ
+	userIdJWT, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "User ID not found in context",
+		})
+		return
+	}
+
+	var user domain.User
+	if err := s.DB.WithContext(c).Where("email = ? AND user_id = ?", body.Email, userIdJWT).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID not found in context"})
+		return
+	}
+
+	// GENERATE TOKEN random UNTUK VALIDASI CHANGE PASSS
+	token := fmt.Sprintf("%x", sha256.Sum256([]byte(time.Now().String())))
+	user.Token = token
+
+	log.Println(body.Email)
+	log.Println(userIdJWT)
+
+	if err := s.DB.WithContext(c).
+		Model(&domain.User{}).
+		Where("email = ? AND id = ?", body.Email, userIdJWT).
+		Updates(map[string]interface{}{
+			"token":    token,
+			"new_pass": body.NewPassword,
+		}).Error; err != nil {
+		fmt.Println("GORM Error: ", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to update token and password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":            "sending confirmation chane pass",
+		"token_confirmation": token,
+	})
+	return
+
 }
 
 func (s UserServiceImpl) ConfirmChangePass(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	var body dto.TokenConfirm
+	log.Print(body)
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	var user domain.User
+	if err := s.DB.WithContext(c).Where("token = ?", body.Token).First(&user).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		return
+	}
+
+	password, err := bcrypt.GenerateFromPassword([]byte(user.NewPass), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error hash pass"})
+		return
+	}
+	user.Password = string(password)
+	user.NewPass = ""
+	user.Token = ""
+
+	if err := s.DB.WithContext(c).Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password has been updated"})
+
 }
 
 func (s UserServiceImpl) AddFavAnime(c *gin.Context) {

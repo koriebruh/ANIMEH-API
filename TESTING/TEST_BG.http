@@ -56,9 +56,30 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "username": "hanni",
-  "email": "hannih@gmail",
+  "username": "hanniPham",
+  "email": "hannih@gmail.com",
   "password": "hanni72"
+}
+
+### CHANGE PASS
+POST http://localhost:8080/users/change
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1LCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM3Mjg4NTJ9.KnkzzBZN_pV_2-PFzrCn9frdKBz-k8xmq_xvVi6fGIY
+
+{
+  "email": "hannih@gmail.com",
+  "new_password": "hannikuh"
+}
+
+### CONFIRMATION CHANGE
+POST http://localhost:8080/users/change-confirm
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1LCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM3Mjg4NTJ9.KnkzzBZN_pV_2-PFzrCn9frdKBz-k8xmq_xvVi6fGIY
+
+{
+  "token": "f5a21a349410f24c1fa77572ffb3c69aafba7bc5a4c81941c8c2cb2800e7b638"
 }
 
 ### LOGIN TEST
@@ -67,8 +88,8 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "hannih@gmail",
-  "password": "hanni72"
+  "email": "hannih@gmail.com",
+  "password": "hannikuh"
 }
 
 ### LOGIN TEST
@@ -77,7 +98,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "himmel@gmail",
+  "email": "himmel@gmail.com",
   "password": "himmel"
 }
 
