@@ -8,7 +8,7 @@ import (
 )
 
 func TestEsConnection(t *testing.T) {
-	client := conf.ElasticClient()
+	client := conf.ElasticClient(conf.GetConfig())
 	assert.NotNil(t, client)
 
 	res, err := client.Info()

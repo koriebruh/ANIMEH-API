@@ -7,18 +7,22 @@ import (
 	"koriebruh/find/service"
 	"log/slog"
 	"net/http"
+	"sync"
 )
 
-// Elasticsearch client
+var once sync.Once
 
 func main() {
 
-	cnf := conf.GetConfig()
+	//time.Sleep(5 * time.Second)
 
-	// Kemudian sisipkan data CSV
+	cnf := conf.GetConfig()
 	es := conf.ElasticClient(cnf)
 	db := conf.InitDB(cnf)
-	//insert.InsertDataCSVToElastic(es)
+
+	//once.Do(func() {
+	//	insert.InsertDataCSVToElastic(es)
+	//})
 
 	animeService := service.NewAnimeService(es)
 	userService := service.NewUserService(es, db)

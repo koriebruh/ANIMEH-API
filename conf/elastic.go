@@ -28,6 +28,7 @@ func ElasticClient(conf *Config) *elasticsearch.Client {
 
 	esClient, err := elasticsearch.NewClient(cfg)
 	if err != nil {
+		log.Fatalf("")
 		log.Fatalf("Error creating Elasticsearch client: %s", err)
 	}
 

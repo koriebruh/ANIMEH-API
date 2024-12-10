@@ -264,7 +264,9 @@ func (s UserServiceImpl) AddFavAnime(c *gin.Context) {
 	}
 
 	// CHECK APAKAH ANIME DENGAN ID TESEBUT ADA DI DB ELASTIC ?
-	EsRequest := fmt.Sprintf("http://localhost:9200/anime_info/_doc/%v", animeId)
+	cnf := conf.GetConfig().Elastic
+	EsRequest := fmt.Sprintf("http://%v:%v/anime_info/_doc/%v", cnf.Host, cnf.Port, animeId)
+	//EsRequest := fmt.Sprintf("http://localhost:9200/anime_info/_doc/%v", animeId)
 	resp, err := http.Get(EsRequest)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error Request in ES"})

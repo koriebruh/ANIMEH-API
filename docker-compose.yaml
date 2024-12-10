@@ -1,20 +1,47 @@
-
 services:
-  elasticsearch_anime:
+
+  api_anime:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - elasticsearch_anime
+      - mysql-anime
+    restart: always
+
+  elasticsearch_anime:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.7.0
     container_name: elasticsearch_anime
     environment:
+      - xpack.ml.enabled=true
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"  # Sesuaikan memori sesuai kebutuhan
       - "xpack.security.enabled=false"  # Menonaktifkan keamanan
+#      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
     ports:
       - "9200:9200"
       - "9300:9300"
     volumes:
       - esdata_bg:/usr/share/elasticsearch/data
 
+  mysql-anime:
+    container_name: mysql-anime
+    image: mysql:5.7
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: 'api_anime'
+      MYSQL_USER: 'korie'
+      MYSQL_PASSWORD: 'korie123'
+      MYSQL_ROOT_PASSWORD: 'korie123'
+    volumes:
+      - mysql-anime:/var/lib/mysql
+
 volumes:
   esdata_bg:
     driver: local
+  mysql-anime:
