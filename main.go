@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"koriebruh/find/conf"
 	"koriebruh/find/service"
@@ -11,9 +12,12 @@ import (
 // Elasticsearch client
 
 func main() {
+
+	cnf := conf.GetConfig()
+
 	// Kemudian sisipkan data CSV
 	es := conf.ElasticClient()
-	db := conf.InitDB()
+	db := conf.InitDB(cnf)
 	//insert.InsertDataCSVToElastic(es)
 
 	animeService := service.NewAnimeService(es)
@@ -42,6 +46,7 @@ func main() {
 	})
 
 	// Start server
-	slog.Info("RUN IN PORT 8080")
-	r.Run(":8080") // Listen on port 8080
+	serverRun := fmt.Sprintf("%s:%s", cnf.Server.Host, cnf.Server.Port)
+	slog.Info(serverRun)
+	r.Run(serverRun)
 }

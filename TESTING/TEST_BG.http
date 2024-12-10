@@ -56,30 +56,30 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "username": "hanniPham",
-  "email": "hannih@gmail.com",
-  "password": "hanni72"
+  "username": "fren",
+  "email": "frenm@gmail.com",
+  "password": "fren123"
 }
 
 ### CHANGE PASS
 POST http://localhost:8080/users/change
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1LCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM3Mjg4NTJ9.KnkzzBZN_pV_2-PFzrCn9frdKBz-k8xmq_xvVi6fGIY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywiaXNzIjoia29yaWVicnVoIiwiZXhwIjoxNzMzODAyODk5fQ.ww76V1uld_SzTf610cVmQjJf7g57-bvmX0NWwb-oUJ8
 
 {
-  "email": "hannih@gmail.com",
-  "new_password": "hannikuh"
+  "email": "frenm@gmail.com",
+  "new_password": "fren47"
 }
 
 ### CONFIRMATION CHANGE
 POST http://localhost:8080/users/change-confirm
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1LCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM3Mjg4NTJ9.KnkzzBZN_pV_2-PFzrCn9frdKBz-k8xmq_xvVi6fGIY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywiaXNzIjoia29yaWVicnVoIiwiZXhwIjoxNzMzODAyODk5fQ.ww76V1uld_SzTf610cVmQjJf7g57-bvmX0NWwb-oUJ8
 
 {
-  "token": "f5a21a349410f24c1fa77572ffb3c69aafba7bc5a4c81941c8c2cb2800e7b638"
+  "token": "04c48c971fbaebbac343d5934a9bf4f831c9ad426ecb6e54ece769fad114432a"
 }
 
 ### LOGIN TEST
@@ -88,8 +88,8 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "hannih@gmail.com",
-  "password": "hannikuh"
+  "email": "frenm@gmail.com",
+  "password": "fren123"
 }
 
 ### LOGIN TEST
@@ -98,27 +98,27 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "himmel@gmail.com",
-  "password": "himmel"
+  "email": "korie@gmail.com",
+  "password": "korie"
 }
 
 
 ### ADD FAV
-POST http://localhost:8080/users/fav/72
+POST http://localhost:8080/users/fav/771
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM2NzgxMzd9.kY8wzBOR3AnVo7WyBbQ4xIeXdU3WZ-tYZqx7ZRv4_vM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywiaXNzIjoia29yaWVicnVoIiwiZXhwIjoxNzMzODAyODk5fQ.ww76V1uld_SzTf610cVmQjJf7g57-bvmX0NWwb-oUJ8
 
-### ADD FAV
-DELETE http://localhost:8080/users/fav/1000
+### UN FAV
+DELETE http://localhost:8080/users/fav/771
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM2NzczODZ9.3WupZCRlcIIUKKlhwY7ARNnq24im40sNpjqc76t5Zao
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywiaXNzIjoia29yaWVicnVoIiwiZXhwIjoxNzMzODAyODk5fQ.ww76V1uld_SzTf610cVmQjJf7g57-bvmX0NWwb-oUJ8
 
 
 ### LIST FAV
 GET http://localhost:8080/users/fav
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM2ODA1ODl9.AaptFTpONKnbBNOGuB7ilI0XWty7pQNy-UUoEFE1fc4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywiaXNzIjoia29yaWVicnVoIiwiZXhwIjoxNzMzODAyODk5fQ.ww76V1uld_SzTf610cVmQjJf7g57-bvmX0NWwb-oUJ8
 

@@ -40,7 +40,7 @@ func NewUserService(esClient *elasticsearch.Client, DB *gorm.DB) *UserServiceImp
 }
 
 func (s UserServiceImpl) Register(c *gin.Context) {
-	var body domain.User
+	var body dto.RegisterReq
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
@@ -86,6 +86,7 @@ func (s UserServiceImpl) Register(c *gin.Context) {
 	log.Println("DATA FOR REGISTER ", newUser)
 
 	if err = s.DB.WithContext(c).Create(&newUser).Error; err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed Create New User"})
 		return
 	}
@@ -173,7 +174,7 @@ func (s UserServiceImpl) ChangePass(c *gin.Context) {
 
 	// GENERATE TOKEN random UNTUK VALIDASI CHANGE PASSS
 	token := fmt.Sprintf("%x", sha256.Sum256([]byte(time.Now().String())))
-	user.Token = token
+	user.Token = &token
 
 	log.Println(body.Email)
 	log.Println(userIdJWT)
@@ -212,16 +213,20 @@ func (s UserServiceImpl) ConfirmChangePass(c *gin.Context) {
 		return
 	}
 
-	password, err := bcrypt.GenerateFromPassword([]byte(user.NewPass), bcrypt.DefaultCost)
+	password, err := bcrypt.GenerateFromPassword([]byte(*user.NewPass), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error hash pass"})
 		return
 	}
+
 	user.Password = string(password)
-	user.NewPass = ""
-	user.Token = ""
+	*user.NewPass = ""
+
+	var newToken *string
+	user.Token = newToken
 
 	if err := s.DB.WithContext(c).Save(&user).Error; err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
 		return
 	}

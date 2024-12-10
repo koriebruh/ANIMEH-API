@@ -9,14 +9,14 @@ import (
 	"log/slog"
 )
 
-func InitDB() *gorm.DB {
+func InitDB(conf *Config) *gorm.DB {
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		"root",      // Username
-		"korie123",  // Password
-		"localhost", // Hostname
-		"3306",      // Port
-		"api_anime", // Database Name
+		conf.Mysql.User, // Username
+		conf.Mysql.Pass, // Password
+		conf.Mysql.Host, // Hostname
+		conf.Mysql.Port, // Port
+		conf.Mysql.Name, // Database Name
 	)
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{

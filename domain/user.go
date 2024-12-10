@@ -11,7 +11,7 @@ type User struct {
 	Password string `gorm:"not null" json:"password"`
 
 	//INI HARUS NYA FIELD NYA DI PISAH
-	Token     string `gorm:"unique"`
-	NewPass   string
+	Token     *string `gorm:"unique"`
+	NewPass   *string
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 }
