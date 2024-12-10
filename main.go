@@ -16,7 +16,7 @@ func main() {
 	cnf := conf.GetConfig()
 
 	// Kemudian sisipkan data CSV
-	es := conf.ElasticClient()
+	es := conf.ElasticClient(cnf)
 	db := conf.InitDB(cnf)
 	//insert.InsertDataCSVToElastic(es)
 

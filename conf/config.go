@@ -20,6 +20,7 @@ type Server struct {
 
 type Elastic struct {
 	Host         string
+	Port         string
 	Username     string
 	Password     string
 	MaxIdleConns int
@@ -55,6 +56,7 @@ func GetConfig() *Config {
 		},
 		Elastic: Elastic{
 			Host:         v.GetString("ES_HOST"),
+			Port:         v.GetString("ES_PORT"),
 			Username:     v.GetString("ES_USERNAME"),
 			Password:     v.GetString("ES_PASS"),
 			MaxIdleConns: v.GetInt("MAX_IDLE_CONN"),
