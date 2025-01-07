@@ -3,11 +3,11 @@ GET http://localhost:3000/
 Accept: application/json
 
 ###  AUTO COMPLITE
-GET http://localhost:3000/autocomplete?q=One%20Piece
+GET http://localhost:3000/autocomplete?q=One%20
 Accept: application/json
 Content-Type: application/json
 ### AUTO COMPLITE
-GET http://localhost:3000/autocomplete?q=sousou
+GET http://localhost:3000/autocomplete?q=naratu
 Accept: application/json
 Content-Type: application/json
 
@@ -111,18 +111,17 @@ Content-Type: application/json
 POST http://localhost:3000/users/fav/771
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM4Mzc2NDF9.cLfantEP3V7kO4xRT6fQCcmY_xuCCPlMOFpticnWhbI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzYyNjYxNTl9.R3CJBhFEQSZwfVcaUWmbiSmvAMZIQQu_2-JZcDZneRk
 
 ### UN FAV
 DELETE http://localhost:3000/users/fav/771
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM4Mzc2NDF9.cLfantEP3V7kO4xRT6fQCcmY_xuCCPlMOFpticnWhbI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzYyNjYxNTl9.R3CJBhFEQSZwfVcaUWmbiSmvAMZIQQu_2-JZcDZneRk
 
 
 ### LIST FAV
 GET http://localhost:3000/users/fav
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzM4Mzc2NDF9.cLfantEP3V7kO4xRT6fQCcmY_xuCCPlMOFpticnWhbI
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpc3MiOiJrb3JpZWJydWgiLCJleHAiOjE3MzYyNjYxNTl9.R3CJBhFEQSZwfVcaUWmbiSmvAMZIQQu_2-JZcDZneRk
